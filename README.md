@@ -6,10 +6,11 @@ Some of the scripts will only run on Lua 5.3. Most of them are originally for pe
 
 ### Generator
 
-Scripts that generate new files for use in the tracker.
+Scripts that generate new files.
 
 - `dpcm_mixer`: Creates a new DPCM sample from the sum of two DPCM samples.
 - `ft_nsf2gbs`: Converts any one-channel N163 NSF exported from FamiTracker 0.4.6 or 0CC-FamiTracker 0.3.13 into a GBS Game Boy sound file. Assembly source of the NSF driver's GB-Z80 port not included.
+- `lognsf`: Records the register writes of all tracks of a given NSF, then reports the access history of all used data values in the NSF.
 - `organ`: Generates drawbar organ instruments for the N163.
 - `raw2fti`: Converts a raw unsigned 8-bit mono PCM stream into N163 instruments without resampling.
 - `wavegen`: N163 instrument sampler for loopable WAV files.
@@ -39,6 +40,6 @@ Scripts that read or write 0CC or FTM modules. They require [this](https://githu
 - `0cc_Lxx`: Converts delayed note release effect commands into note releases plus Gxx commands.
 - `ftm2mid`: Converts a module into a standard MIDI file, translating most effect commands into MIDI equivalents.
 - `n163check`: Scans through the songs of a given module and reports all unique combinations of simultaneously used N163 instruments.
-- `obfusc`: Shuffles all the rows of a given module, and places Dxx effects throughout the module so that thw rows will play in the correct order nonetheless.
+- `obfusc`: Shuffles all the rows of a given module, while placing Dxx commands throughout the module to maintain the row ordering.
 
 All these scripts are licensed with the MIT License where unspecified otherwise.
