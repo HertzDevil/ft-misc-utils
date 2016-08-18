@@ -6,10 +6,6 @@ Some of the scripts will only run on Lua 5.3. Most of them are originally for pe
 
 Scripts that generate new files for use in the tracker.
 
-
-- `bpm_custom`: Approximates a given BPM value with a groove, that does not exceed a given size or fits into a pattern evenly.
-- `bpm_default`: Represents a module's BPM configuration as a ticks-per-row sequence.
-- `bpm_dyadic`: Approximates a given BPM value with a groove, where each first half of the groove sequence is at least as long as the second half, to simplify Gxx use.
 - `dpcm_mixer`: Creates a new DPCM sample from the sum of two DPCM samples.
 - `organ`: Generates drawbar organ instruments for the N163.
 - `raw2fti`: Converts a raw unsigned 8-bit mono PCM stream into N163 instruments without resampling.
@@ -19,8 +15,15 @@ Scripts that generate new files for use in the tracker.
 
 Scripts that only display technical information and do not process files.
 
+- `bpm_custom`: Approximates a given BPM value with a groove, that does not exceed a given size or fits into a pattern evenly.
+- `bpm_default`: Represents a module's BPM configuration as a ticks-per-row sequence.
+- `bpm_dyadic`: Approximates a given BPM value with a groove, where each first half of the groove sequence is at least as long as the second half, to simplify Gxx use.
 - `dpcm_loop`: For a given frequency and machine setting, finds the number of WAV samples and the number of wave cycles required to produce a looped DPCM sample at the same pitch.
+- `groove_scaler`: Converts a groove sequence from one refresh rate to another.
 - `lfo`: Generates instrument sequences that emulate the 4xy and 7xy effects.
+- `safe_4xy`: Calculates the Pxx detune values required near certain notes on the 2A03 such that applying a 4xy vibrato over them will not cause a phase reset.
+- `stable_bpm`: Lists all integer refresh rates under 1000 such that the FamiTracker 0.5.0 NSF driver may produce stable BPM values.
+- `stable_refresh`: For a given tempo and speed setting, finds all possible NSF refresh intervals such that the resulting BPM generates the same number of ticks on each row.
 - `tuplet`: Calculates the delay effects required for tuplets in any tempo or groove setting.
 - `vol_factor`: Given a number of 16-step instrument volume sequences, attempts to find a single sequence that can produce all of them under different channel volumes.
 
