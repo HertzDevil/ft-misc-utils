@@ -7,6 +7,7 @@ Some of the scripts will only run on Lua 5.3. Most of them are originally for pe
 Scripts that generate new files for use in the tracker.
 
 - `dpcm_mixer`: Creates a new DPCM sample from the sum of two DPCM samples.
+- `ft_nsf2gbs`: Converts any one-channel N163 NSF exported from FamiTracker 0.4.6 or 0CC-FamiTracker 0.3.13 into a GBS Game Boy sound file. Assembly source of the NSF driver's GB-Z80 port not included.
 - `organ`: Generates drawbar organ instruments for the N163.
 - `raw2fti`: Converts a raw unsigned 8-bit mono PCM stream into N163 instruments without resampling.
 - `wavegen`: N163 instrument sampler for loopable WAV files.
