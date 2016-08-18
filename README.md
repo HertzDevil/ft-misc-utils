@@ -8,6 +8,7 @@ Scripts that generate new files for use in the tracker.
 
 - `dpcm_mixer`: Creates a new DPCM sample from the sum of two DPCM samples.
 - `organ`: Generates drawbar organ instruments for the N163.
+- `raw2fti`: Converts a raw unsigned 8-bit mono PCM stream into N163 instruments without resampling.
 - `wavegen`: N163 instrument sampler for loopable WAV files.
 
 ### Info
