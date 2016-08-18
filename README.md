@@ -6,6 +6,10 @@ Some of the scripts will only run on Lua 5.3. Most of them are originally for pe
 
 Scripts that generate new files for use in the tracker.
 
+
+- `bpm_custom`: Approximates a given BPM value with a groove, that does not exceed a given size or fits into a pattern evenly.
+- `bpm_default`: Represents a module's BPM configuration as a ticks-per-row sequence.
+- `bpm_dyadic`: Approximates a given BPM value with a groove, where each first half of the groove sequence is at least as long as the second half, to simplify Gxx use.
 - `dpcm_mixer`: Creates a new DPCM sample from the sum of two DPCM samples.
 - `organ`: Generates drawbar organ instruments for the N163.
 - `raw2fti`: Converts a raw unsigned 8-bit mono PCM stream into N163 instruments without resampling.
@@ -24,9 +28,10 @@ Scripts that only display technical information and do not process files.
 
 Scripts that read or write 0CC or FTM modules. They require [this](https://github.com/HertzDevil/luaFTM) fairly incomplete Lua library I made.
 
-- `0cc_0xy`: Converts instruments using arpeggio schemes into individual instruments and arpeggio sequences. The actual `0xy` commands themselves are unaffected.
+- `0cc_0xy`: Converts instruments using arpeggio schemes into individual instruments and arpeggio sequences. The actual 0xy commands themselves are unaffected.
 - `0cc_inst`: Clones instruments as necessary such that each channel only uses instruments for the sound chip it belongs to.
 - `0cc_Lxx`: Converts delayed note release effect commands into note releases plus Gxx commands.
+- `ftm2mid`: Converts a module into a standard MIDI file, translating most effect commands into MIDI equivalents.
 - `n163check`: Scans through the songs of a given module and reports all unique combinations of simultaneously used N163 instruments.
 - `obfusc`: Shuffles all the rows of a given module, and places Dxx effects throughout the module so that thw rows will play in the correct order nonetheless.
 
