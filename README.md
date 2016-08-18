@@ -1,4 +1,6 @@
-A directory of all the miscellaneous Lua scripts I wrote for various FamiTracker / 0CC-FamiTracker utilities.
+## FT-Misc-Utils
+
+A collection of (almost) all the miscellaneous Lua scripts I wrote for various FamiTracker / 0CC-FamiTracker utilities.
 
 Some of the scripts will only run on Lua 5.3. Most of them are originally for personal use only, and may differ largely in style; in particular do not expect any comments or help text in them.
 
