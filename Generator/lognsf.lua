@@ -165,9 +165,10 @@ end
 local originalAdr = function (adr)
   if adr > 0xFFFF or adr < 0x8000 then return -1 end
   if not mem.switch then return adr >= mem.LOAD and adr + 0x80 - mem.LOAD or -1 end
-  local index = (adr >> 12) - 8
-  if index == 0 and (adr & 0xFFF) < (mem.LOAD & 0xFFF) then return -1 end
-  return mem[0x5FF8 + index] * 0x1000 + 0x80 + (adr & 0xFFF) - (mem.LOAD & 0xFFF)
+  local bank = mem[0x5FF0 + (adr >> 12)]
+  local offset = (adr & 0xFFF) - (mem.LOAD & 0xFFF)
+  if bank == 0 and offset < 0 then return -1 end
+  return 0x80 + bank * 0x1000 + offset
 end
 
 local readVal = function (pos, count)
@@ -393,6 +394,7 @@ local lognsf = function (fname, param)
   local LOAD = ("<I2"):unpack(f:read(2))
   local INIT = ("<I2"):unpack(f:read(2))
   local PLAY = ("<I2"):unpack(f:read(2))
+
   local INFO = {}
   INFO.TITLE = f:read(0x20)
   INFO.AUTHOR = f:read(0x20)
@@ -424,8 +426,8 @@ local lognsf = function (fname, param)
       end
     end
   end
-
-  local callInit = function (track)
+  
+  local loadNSF = function ()
     initState()
     mem[0x3FF0], mem[0x3FF1], mem[0x3FF2] = 0x20, INIT & 0xFF, INIT >> 8
     mem[0x3FF4], mem[0x3FF5], mem[0x3FF6] = 0x20, PLAY & 0xFF, PLAY >> 8
@@ -442,6 +444,9 @@ local lognsf = function (fname, param)
         mem[i] = b and b:byte() or 0x00
       end
     end
+  end
+
+  local callInit = function (track)
     mem.PC = 0x3FF0
     mem.A = track
     mem.X = REGION
@@ -481,10 +486,14 @@ local lognsf = function (fname, param)
   local dataAll = NumSort()
   local codeSet = {}
   local dataSet = {}
+  local initReal, playReal
 
   for _, i in ipairs(tracklist) do
     print("Tracing song " .. i .. "...")
+    loadNSF()
+    initReal = originalAdr(INIT)
     callInit(i - 1)
+    playReal = originalAdr(PLAY)
     repeat
       callPlay()
     until frame >= math.max(codetrace.lastframe, datatrace.lastframe) + param.timeout;
@@ -510,8 +519,8 @@ local lognsf = function (fname, param)
     fname:gsub(".*[/\\]", ""), INFO.TITLE, INFO.AUTHOR, INFO.COPYRIGHT, TRACK))
   io.write("Bankswitching ", (switch and "enabled" or "disabled"), '\n')
   for i = 0, 7 do bankswitch(i, banks[i + 1]) end
-  io.write(("INIT address: $%X\n"):format(originalAdr(INIT)))
-  io.write(("PLAY address: $%X\n"):format(originalAdr(PLAY)))
+  io.write(("INIT address: $%X\n"):format(initReal))
+  io.write(("PLAY address: $%X\n"):format(playReal))
 
   local trackStr = {}
   local ranges = {}
