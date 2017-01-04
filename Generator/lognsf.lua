@@ -1,3 +1,5 @@
+local altdisp = false
+
 -- table with numeric keys sorted ascending for iteration
 local NumSort = function ()
   local order = {}
@@ -396,9 +398,9 @@ local lognsf = function (fname, param)
   local PLAY = ("<I2"):unpack(f:read(2))
 
   local INFO = {}
-  INFO.TITLE = f:read(0x20)
-  INFO.AUTHOR = f:read(0x20)
-  INFO.COPYRIGHT = f:read(0x20)
+  INFO.TITLE = f:read(0x20):gsub("\x00*$", "")
+  INFO.AUTHOR = f:read(0x20):gsub("\x00*$", "")
+  INFO.COPYRIGHT = f:read(0x20):gsub("\x00*$", "")
   f:seek("set", 0x70)
   local switch = false
   local banks = {}
@@ -408,6 +410,7 @@ local lognsf = function (fname, param)
   end
   f:seek("set", 0x7A)
   local REGION = f:read(1):byte()
+  local FSIZE = f:seek("end")
 
   -- initialization
   local bankswitch = function (index, banknum)
@@ -466,7 +469,7 @@ local lognsf = function (fname, param)
     while mem.PC ~= 0x3FF7 do
       runOpcode()
       if nextSwitch then
-        print("Bankswitching")
+        --print("Bankswitching")
         bankswitch(nextSwitch, mem[0x5FF8 + nextSwitch])
         nextSwitch = nil
       end
@@ -522,65 +525,102 @@ local lognsf = function (fname, param)
   io.write(("INIT address: $%X\n"):format(initReal))
   io.write(("PLAY address: $%X\n"):format(playReal))
 
-  local trackStr = {}
-  local ranges = {}
-  local rangesAll = NumSort()
-  for _, i in ipairs(tracklist) do trackStr[i], ranges[i] = "", {} end
+  if altdisp then
+    -- new style, everything in one tab-separated grid
+    io.write "\n\nTracks:\t"
+    for _, track in ipairs(tracklist) do
+      io.write(("\t%d"):format(track))
+    end
+    io.write '\n'
 
-  io.write "\n\n\nCommon data:\n"
-  for k, v in pairs(dataAll) do
-    f:seek("set", k)
-    if #v > 1 then
-      io.write(("$%06X:%02X accessed in tracks:"):format(k, f:read(1):byte()))
-      for i in pairs(v) do io.write((" %3d"):format(i)) end
+    f:seek("set", 0x80)
+    for pos = 0x80, FSIZE - 1 do
+      local dp = dataAll[pos]
+      local cp = codeAll[pos]
+      local ch = f:read(1):byte()
+      io.write(("$%06X:%02X"):format(pos, ch))
+
+      for _, track in ipairs(tracklist) do
+        if cp and cp[track] then
+          io.write(("\tC%d"):format(codeSet[track].accessed[pos]))
+        elseif dp and dp[track] then
+          io.write(("\tD%d"):format(dataSet[track].accessed[pos]))
+        else
+          io.write '\t-'
+        end
+      end
+
       io.write '\n'
-    else
-      local t = next(v)
-      local r = ranges[t][#ranges[t]]
+    end
+  else
+    -- old style display, only traced rows are printed
+    local trackStr = {}
+    local ranges = {}
+    local rangesAll = NumSort()
+    for _, i in ipairs(tracklist) do trackStr[i], ranges[i] = {}, {} end
+
+    io.write "\n\n\nCommon data:\n"
+    for k, v in pairs(dataAll) do
+      f:seek("set", k)
+      local ch = f:read(1)
+      if ch then
+        ch = ch:byte()
+      else
+        ch = 0
+        io.stderr:write(("Out-of-bound access at address $%06X\n"):format(k))
+      end
+      if #v > 1 then
+        io.write(("$%06X:%02X accessed in tracks:"):format(k, ch))
+        for i in pairs(v) do io.write((" %3d"):format(i)) end
+        io.write '\n'
+      else
+        local t = next(v)
+        local r = ranges[t][#ranges[t]]
+        if r and r[2] == k - 1 then
+          r[2] = k
+        else
+          table.insert(ranges[t], {k, k})
+        end
+        table.insert(trackStr[t], ("$%06X:%02X first accessed on frame %4d\n"):format(
+          k, ch, dataSet[t].accessed[k]))
+      end
+    end
+    io.write("\n\n\nTrack data:\n")
+    for i, t in next, ranges do for _, v in ipairs(t) do
+      v[3] = i
+      rangesAll[v[1]] = v
+    end end
+    for _, v in pairs(rangesAll) do
+      io.write(("Track %03d: $%06X - $%06X (%d byte%s)\n"):format(
+        v[3], v[1], v[2], v[2] - v[1] + 1, v[1] == v[2] and "" or "s"))
+    end
+    for _, i in ipairs(tracklist) do
+      io.write("\n\n\nTrack " .. i .. " accesses:\n", table.concat(trackStr[i]))
+    end
+    
+    local coderange = {}
+    for k, v in pairs(codeAll) do if #v == TRACK then
+      local r = coderange[#coderange]
       if r and r[2] == k - 1 then
         r[2] = k
       else
-        table.insert(ranges[t], {k, k})
+        table.insert(coderange, {k, k})
       end
-      trackStr[t] = trackStr[t] .. ("$%06X:%02X first accessed on frame %4d\n"):format(
-        k, f:read(1):byte(), dataSet[t].accessed[k])
-    end
-  end
-  io.write("\n\n\nTrack data:\n")
-  for i, t in next, ranges do for _, v in ipairs(t) do
-    v[3] = i
-    rangesAll[v[1]] = v
-  end end
-  for _, v in pairs(rangesAll) do
-    io.write(("Track %03d: $%06X - $%06X (%d byte%s)\n"):format(
-      v[3], v[1], v[2], v[2] - v[1] + 1, v[1] == v[2] and "" or "s"))
-  end
-  for _, i in ipairs(tracklist) do
-    io.write("\n\n\nTrack " .. i .. " accesses:\n", trackStr[i])
-  end
-  
-  local coderange = {}
-  for k, v in pairs(codeAll) do if #v == TRACK then
-    local r = coderange[#coderange]
-    if r and r[2] == k - 1 then
-      r[2] = k
-    else
-      table.insert(coderange, {k, k})
-    end
-  end end
+    end end
 
-  io.write "\n\n\nCommon code:\n"
-  for _, v in ipairs(coderange) do
-    io.write(("$%06X - $%06X (%d byte%s)\n"):format(
-      v[1], v[2], v[2] - v[1] + 1, v[1] == v[2] and "" or "s"))
+    io.write "\n\n\nCommon code:\n"
+    for _, v in ipairs(coderange) do
+      io.write(("$%06X - $%06X (%d byte%s)\n"):format(
+        v[1], v[2], v[2] - v[1] + 1, v[1] == v[2] and "" or "s"))
+    end
+    io.write "\n\n\nConditional code:\n"
+    for k, v in pairs(codeAll) do if #v < TRACK then
+      f:seek("set", k)
+      io.write(("$%06X:%02X accessed in tracks:"):format(k, f:read(1):byte()))
+      for i in pairs(v) do io.write((" %3d"):format(i)) end
+      io.write '\n'
+    end end
   end
-  io.write "\n\n\nConditional code:\n"
-  for k, v in pairs(codeAll) do if #v < TRACK then
-    f:seek("set", k)
-    io.write(("$%06X:%02X accessed in tracks:"):format(k, f:read(1):byte()))
-    for i in pairs(v) do io.write((" %3d"):format(i)) end
-    io.write '\n'
-  end end
 
   io.output():close()
   f:close()
