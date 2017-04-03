@@ -171,8 +171,10 @@ end
 
 fname = ARGV.shift
 if !fname
-  puts USAGE
-  exit
+  print "VGM file name: "
+  fname = $stdin.readline.chomp
+#  puts USAGE
+#  exit
 end
 args[:input_name] = fname
 args[:output_name] = fname + ".snm" unless args[:output_name]
