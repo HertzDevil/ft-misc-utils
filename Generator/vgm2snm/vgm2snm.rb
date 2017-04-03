@@ -24,9 +24,9 @@ module VGM2SNM
     hz = args[:refresh_rate] || vgm.refresh_rate
     hz = 60 if hz == 0
     snm.refresh_rate = hz.round
+    samplerate = args[:samples] || VGMFile::SAMPLE_RATE
     song.speed = 1
     song.tempo = (hz * 2.5).floor
-    song.rows = args[:rows] || 256
 
     frame = 0
     row = 0
@@ -35,6 +35,7 @@ module VGM2SNM
     (0...snm.track_count).each do |x|
       song.tracks[x].fxcount = x == 3 ? 3 : 2
     end
+    song.rows = args[:rows] || 256
     bxx = nil
 
     next_frame = lambda do
@@ -47,10 +48,11 @@ module VGM2SNM
       true
     end
 
+    vgm.read_cmds(args[:skip]) if args[:skip]
+
     while true
-#      samples = VGMFile::SAMPLE_RATE * (tick + 1) / hz -
-#        VGMFile::SAMPLE_RATE * tick / hz
-      samples = VGMFile::SAMPLE_RATE / hz
+#      samples = samplerate * (tick + 1) / hz - samplerate * tick / hz
+      samples = samplerate / hz
       cmd = vgm.read_cmds(samples)
       if cmd[:halt]
         pat[3].get_note(row).fx[2] = [SNM::EF[:HALT], 0]
@@ -129,6 +131,11 @@ Options:
     Overrides the VGM and SNM refresh rate.
   --rows, -R <rows>
     Changes the number of rows per frame. (default 256)
+  --samples, -s <rate>
+    Changes the number of samples per second. This option actually scales the
+    output's tempo. (default 44100)
+  --skip, -k <count>
+    Ignores the first <count> samples from the VGM.
 EOF
 
 args = {}
@@ -139,6 +146,8 @@ GetoptLong.new(
   ['--output' , '-o', GetoptLong::REQUIRED_ARGUMENT],
   ['--rate'   , '-r', GetoptLong::REQUIRED_ARGUMENT],
   ['--rows'   , '-R', GetoptLong::REQUIRED_ARGUMENT],
+  ['--samples', '-s', GetoptLong::REQUIRED_ARGUMENT],
+  ['--skip'   , '-k', GetoptLong::REQUIRED_ARGUMENT],
 ).each do |opt, arg|
   case opt
   when '--help'
@@ -153,6 +162,10 @@ GetoptLong.new(
     args[:refresh_rate] = arg.to_f
   when '--rows'
     args[:rows] = arg.to_i
+  when '--samples'
+    args[:samples] = arg.to_f
+  when '--skip'
+    args[:skip] = arg.to_i
   end
 end
 

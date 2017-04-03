@@ -24,7 +24,11 @@ module VGM2SNM
         end
  
         def get_data
-          [@parent.title, @parent.author, @parent.copyright].pack "a32a32a32"
+          [
+            @parent.title, 0,
+            @parent.author, 0,
+            @parent.copyright, 0,
+          ].pack "a31Ca31Ca31C"
         end
       end
 
