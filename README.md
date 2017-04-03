@@ -1,8 +1,10 @@
 ## FT-Misc-Utils
 
-A collection of (almost) all the miscellaneous Lua scripts I wrote for various FamiTracker / 0CC-FamiTracker utilities.
+A collection of (almost) all the miscellaneous Lua / Ruby scripts I wrote for various FamiTracker / 0CC-FamiTracker utilities.
 
-Some of the scripts will only run on Lua 5.3. Most of them are originally for personal use only, and may differ largely in style; in particular do not expect any comments or help text in them.
+Some of the Lua scripts will only run on Lua 5.3. Most of them are originally for personal use only, and may differ largely in style; in particular do not expect any comments or help text in them.
+
+Users of [RubyInstaller](https://rubyinstaller.org/) should be able to launch the Ruby scripts with no issues.
 
 ### Generator
 
@@ -13,6 +15,7 @@ Scripts that generate new files.
 - `lognsf`: Records the register writes of all tracks of a given NSF, then reports the access history of all used data values in the NSF.
 - `organ`: Generates drawbar organ instruments for the N163.
 - `raw2fti`: Converts a raw unsigned 8-bit mono PCM stream into N163 instruments without resampling.
+- `vgm2snm`: Converts VGM sound files into SnevenTracker modules. Currently supports the SN76489 only.
 - `wavegen`: N163 instrument sampler for loopable WAV files.
 
 ### Info
