@@ -117,7 +117,7 @@ module VGM2SNM
 end
 
 USAGE = <<EOF
-Usage: vgm2snm [<option>...] <vgmfile>
+Usage: vgm2snm [<option>...] <vgmfile>...
 EOF
 HELP = USAGE + <<EOF
 Options:
@@ -126,7 +126,8 @@ Options:
   --version
     Displays the script version.
   --output, -o <snmfile>
-    Supplies a custom output module's file name.
+    Supplies a custom output module's file name. Does not work if multiple
+    input files are specified.
   --rate, -r <hertz>
     Overrides the VGM and SNM refresh rate.
   --rows, -R <rows>
@@ -169,17 +170,20 @@ GetoptLong.new(
   end
 end
 
-fname = ARGV.shift
-if !fname
+if ARGV.empty?
   print "VGM file name: "
-  fname = $stdin.readline.chomp
-  if fname =~ %r{^"(.*)"$}
-    fname = $1
+  ARGV[0] = $stdin.readline.chomp
+  if ARGV[0] =~ %r{^"(.*)"$}
+    ARGV[0] = $1
   end
-#  puts USAGE
-#  exit
+else
+  raise "Cannot use option '-o' here" if
+    args[:output_name]
 end
-args[:input_name] = fname
-args[:output_name] = fname + ".snm" unless args[:output_name]
 
-VGM2SNM.main args
+ARGV.each do |fname|
+  current_args = args.clone
+  current_args[:input_name] = fname
+  current_args[:output_name] = fname + ".snm" unless args[:output_name]
+  VGM2SNM.main current_args
+end
