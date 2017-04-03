@@ -249,7 +249,7 @@ FTM2MIDI = function (setting)
       end end
       if n.vol ~= 0x10 then
         if cStateVel[ch] ~= n.vol and setting.swap then
-          table.insert(score[ch + 1], {"control_change", d, chMap[ch], 0x07, VELOCITY[n.vol]})
+          table.insert(score[ch + 1], {"control_change", math.floor(d + .5), chMap[ch], 0x07, VELOCITY[n.vol]})
         end
         cStateVel[ch] = n.vol
         if cAxy[ch] then cAxy[ch].d = d end
@@ -260,9 +260,9 @@ FTM2MIDI = function (setting)
         if chMap[ch] and old ~= new and setting.instMap[new] ~= false and
            ((setting.instMap[old] or 0) ~= (setting.instMap[new] or 0)) then
           if chMap[ch] ~= 9 then
-            table.insert(score[ch + 1], {"patch_change", d, chMap[ch], setting.instMap[new] or 0})
+            table.insert(score[ch + 1], {"patch_change", math.floor(d + .5), chMap[ch], setting.instMap[new] or 0})
           elseif ch == 5 then
-            table.insert(dpcmMel, {"patch_change", d, melCh, setting.instMap[new] or 0})
+            table.insert(dpcmMel, {"patch_change", math.floor(d + .5), melCh, setting.instMap[new] or 0})
           end
         end
         cStateInst[ch] = new
