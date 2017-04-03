@@ -181,8 +181,10 @@ module VGM2SNM
       end
     end
 
-    def a_cmd0(byte)
+    def a_sgen_2a(byte)
+      @wait += byte - 0x80
     end
+
     def a_cmd1(byte)
       next_byte
     end
@@ -200,13 +202,43 @@ module VGM2SNM
       raise(sprintf("Unknown command %02X at 0x%X", byte, @data_ptr - 1))
     end
     def a_data_block(byte)
-      raise "Data blocks are not implemented"
+      raise "Invalid data block" unless next_byte == 0x66
+      data_type = next_byte
+      data_size = next_byte
+      data_size += next_byte << 8
+      data_size += next_byte << 16
+      data_size += next_byte << 24
+      # data_buf = @data[@data_ptr, data_size]
+      @data_ptr += data_size
     end
     def a_pcm_write(byte)
-      raise "PCM RAM write is not implemented"
+      raise "Invalid RAM write" unless next_byte == 0x66
+      @data_ptr += 10
     end
-    def a_stream_ctrl(byte)
-      raise "Stream control is not implemented"
+
+    def a_st_setup(byte)
+      puts "Stream control is not implemented"
+      @data_ptr += 4
+    end
+    def a_st_set(byte)
+      puts "Stream control is not implemented"
+      @data_ptr += 4
+    end
+    def a_st_freq(byte)
+      puts "Stream control is not implemented"
+      @data_ptr += 5
+    end
+    def a_st_start(byte)
+      puts "Stream control is not implemented"
+      @data_ptr += 10
+    end
+    def a_st_stop(byte)
+      puts "Stream control is not implemented"
+      @data_ptr += 1
+    end
+    def a_st_fast(byte)
+      puts "Stream control is not implemented"
+      @data_ptr += 4
     end
 
     def self.im(x) instance_method(x) end
@@ -261,14 +293,14 @@ module VGM2SNM
       im(:a_wait_fast), im(:a_wait_fast), im(:a_wait_fast), im(:a_wait_fast),
 
       # 0x80 - 0x8F
-      im(:a_cmd0), im(:a_cmd0), im(:a_cmd0), im(:a_cmd0),
-      im(:a_cmd0), im(:a_cmd0), im(:a_cmd0), im(:a_cmd0),
-      im(:a_cmd0), im(:a_cmd0), im(:a_cmd0), im(:a_cmd0),
-      im(:a_cmd0), im(:a_cmd0), im(:a_cmd0), im(:a_cmd0),
+      im(:a_sgen_2a), im(:a_sgen_2a), im(:a_sgen_2a), im(:a_sgen_2a),
+      im(:a_sgen_2a), im(:a_sgen_2a), im(:a_sgen_2a), im(:a_sgen_2a),
+      im(:a_sgen_2a), im(:a_sgen_2a), im(:a_sgen_2a), im(:a_sgen_2a),
+      im(:a_sgen_2a), im(:a_sgen_2a), im(:a_sgen_2a), im(:a_sgen_2a),
 
       # 0x90 - 0x9F
-      im(:a_stream_ctrl), im(:a_stream_ctrl), im(:a_stream_ctrl), im(:a_stream_ctrl),
-      im(:a_stream_ctrl), im(:a_stream_ctrl), im(:a_invalid), im(:a_invalid),
+      im(:a_st_setup), im(:a_st_set), im(:a_st_freq), im(:a_st_start),
+      im(:a_st_stop), im(:a_st_fast), im(:a_invalid), im(:a_invalid),
       im(:a_invalid), im(:a_invalid), im(:a_invalid), im(:a_invalid),
       im(:a_invalid), im(:a_invalid), im(:a_invalid), im(:a_invalid),
 
