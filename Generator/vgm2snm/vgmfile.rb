@@ -7,6 +7,16 @@
 require_relative "snmfile"
 require "zlib"
 
+class Array
+  if !method_defined? :to_h
+    def to_h
+      hsh = {}
+      self.each {|k, v| hsh[k] = v}
+      hsh
+    end
+  end
+end
+
 module VGM2SNM
   class VGMFile
     SAMPLE_RATE = 44100

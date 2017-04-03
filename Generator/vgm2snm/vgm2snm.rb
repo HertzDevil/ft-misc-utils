@@ -173,6 +173,9 @@ fname = ARGV.shift
 if !fname
   print "VGM file name: "
   fname = $stdin.readline.chomp
+  if fname =~ %r{^"(.*)"$}
+    fname = $1
+  end
 #  puts USAGE
 #  exit
 end
