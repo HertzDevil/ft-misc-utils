@@ -197,17 +197,21 @@ FTM2MIDI = function (setting)
           arpTable = arpDefault[cInst[ch]] or cArp[ch]
         end
       end
-      local volume = setting.swap and cMix[ch] or cVel[ch]
-      for k in pairs(arpTable) do if k ~= "x" and k ~= "y" then
-        if (ch ~= 5 or Dt and setting.DPCMmap[Dt.id] ~= false) and
-           (ch ~= 4 or setting.noiseMap[cInst[ch]] ~= false) then
-          if ch == 5 and setting.DPCMmelodic[Dt.id] and melCh then
-            table.insert(dpcmMel, {"note", cTime[ch], length, melCh, cNote[ch] + k, volume})
-          elseif chMap[ch] then
-            table.insert(score[ch + 1], {"note", cTime[ch], length, chMap[ch], cNote[ch] + k, volume})
-          end
+      if length > 0 then
+        local volume = setting.swap and cMix[ch] or cVel[ch]
+        if volume > 0 then
+          for k in pairs(arpTable) do if k ~= "x" and k ~= "y" then
+            if (ch ~= 5 or Dt and setting.DPCMmap[Dt.id] ~= false) and
+               (ch ~= 4 or setting.noiseMap[cInst[ch]] ~= false) then
+              if ch == 5 and setting.DPCMmelodic[Dt.id] and melCh then
+                table.insert(dpcmMel, {"note", cTime[ch], length, melCh, cNote[ch] + k, volume})
+              elseif chMap[ch] then
+                table.insert(score[ch + 1], {"note", cTime[ch], length, chMap[ch], cNote[ch] + k, volume})
+              end
+            end
+          end end
         end
-      end end
+      end
     end
     cCut[ch] = nil
   end
@@ -317,7 +321,7 @@ FTM2MIDI = function (setting)
         elseif n.fx[i].name == FX.PORTA_UP or n.fx[i].name == FX.PORTA_DOWN
             or n.fx[i].name == FX.SLIDE_UP or n.fx[i].name == FX.SLIDE_DOWN
             or n.fx[i].name == FX.PORTAMENTO then
-          cArp[ch] = {[0] = true}
+          cArp[ch] = {[0] = true, x = 0, y = 0}
         elseif setting.use0CCfx and not setting.release and n.fx[i].name == FX.NOTE_RELEASE
             or n.fx[i].name == FX.NOTE_CUT then
           if not cCut[ch] then cCut[ch] = d + score[1] / 4 * n.fx[i].param * tick() end
