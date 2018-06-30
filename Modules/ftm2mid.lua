@@ -177,7 +177,7 @@ FTM2MIDI = function (setting)
         cSweep[ch] = nil
       else
         local s = ins and ins.seq and ins.seq[2]
-        if s and s.setting == 3 and s.loop and (not s.release or s.loop <= s.release) then -- arp scheme
+        if s and s.mode == 3 and s.loop and (not s.release or s.loop <= s.release) then -- arp scheme
           arpTable = {}
           for _, v in ipairs(s) do
             local offs, scheme = v % 64, math.floor(v / 64) % 4
