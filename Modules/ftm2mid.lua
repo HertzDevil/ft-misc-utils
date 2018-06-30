@@ -99,7 +99,7 @@ FTM2MIDI = function (setting)
   local arpDefault = {}
   for k, v in pairs(ftm.inst) do
     local s = v.seq and v.seq[2]
-    if s and s.setting == 0 and s.loop and (not s.release or s.loop <= s.release) then
+    if s and s.mode == 0 and s.loop and (not s.release or s.loop <= s.release) then
       arpDefault[k] = {}
       for i = s.loop, s.release or #s do
         arpDefault[k][s[i]] = true
