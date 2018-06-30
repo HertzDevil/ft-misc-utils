@@ -116,8 +116,13 @@ FTM2MIDI = function (setting)
     return sp
   end
   
+  local getFTMRate = function ()
+    local hz = ftm.param.rate
+    return hz ~= 0 and hz or ftm.param.machine == 'PAL' and 50 or 60
+  end
+  
   local tick = function ()
-    return cTempo / avgSpd() / 2.5 / ftm.param.rate
+    return cTempo / avgSpd() / 2.5 / getFTMRate()
   end
   
   local getNote = function (n, ch)
